@@ -1,0 +1,81 @@
+
+version: "3.8"
+
+
+services:
+ 
+  web:
+   
+    depends_on: 
+      - api
+ 
+    build: ./frontend
+  
+    # the second number is the port inside the container
+    ports:
+      - 3000:3000
+    
+    environment:
+      API_URL: http://localhost:5000
+
+  
+    develop:
+     
+      watch:
+      
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/package-lock.json
+          action: rebuild
+     
+        - path: ./frontend
+          target: /app
+          action: sync
+
+  
+  api: 
+    
+    depends_on: 
+      - db
+
+   
+    build: ./backend
+    
+  
+    ports: 
+      - 5000:5000
+
+   
+    environment: 
+      DB_URL: mongodb://db/jobboard
+    
+   
+    develop:
+    
+      watch:
+      
+        - path: ./backend/package.json
+          action: rebuild
+        - path: ./backend/package-lock.json
+          action: rebuild
+        
+      
+        - path: ./backend
+          target: /app
+          action: sync
+
+ 
+  db:
+
+    image: mongo:latest
+
+
+    ports:
+      - 27017:27017
+
+  
+    volumes:
+      - jobs:/data/db
+
+volumes:
+  jobs:
